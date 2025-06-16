@@ -166,6 +166,7 @@ class App {
         const name = card.querySelector('.product__title a').textContent.trim();
         const priceText = card.querySelector('.product__price').textContent.trim();
         const price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
+        const quantity = 1;
         const stock = true;
 
         // Enviar al dataLayer
@@ -179,7 +180,7 @@ class App {
               item_name: name,
               price: price,
               stock: stock,
-              quantity: 1,
+              quantity: quantity,
               index: index + 1
             }]
           }

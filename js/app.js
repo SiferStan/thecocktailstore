@@ -114,37 +114,45 @@ class App {
     });
   }
 
-  // ✅ view_item: al ver detalles del producto (si aplica)
-  trackViewItem() {
-    const isDetailPage = window.location.pathname.includes('product.html');
-    if (!isDetailPage) return;
+  // ✅ view_item: al hacer clic en botón "Ver detalles"
+  trackViewItem () {
+    document.querySelectorAll('.button--secondary[href^="product.html?id="]').forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const card = btn.closest(".product__card");
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
-    if (!id) return;
+        // Obtener ID desde el href del botón
+        const url = new URL(btn.href, window.location.origin);
+        const id = url.searchParams.get("id");
 
-    const titleEl = document.querySelector('.product__title a');
-    const priceEl = document.querySelector('.product__price');
+        // Extraer nombre del producto
+        const name = card.querySelector(".product__title a").textContent.trim();
 
-    if (!titleEl || !priceEl) return;
+        // Extraer precio y convertirlo a número
+        const priceText = card.querySelector(".product__price").textContent.trim();
+        const price = parseFloat(priceText.replace(/[^0-9.]/g, ""));
 
-    const name = titleEl.textContent.trim();
-    const price = parseFloat(priceEl.textContent.replace(/[^0-9.]/g, ''));
-    const category = 'smartphones'; // O dinámico si lo tienes
-    const stock = true;
+        // Stock fijo a true (puedes hacerlo dinámico si se necesita)
+        const stock = true;
 
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: 'view_item',
-      ecommerce: {
-        items: [{
-          item_id: id,
-          item_name: name,
-          price: price,
-          item_category: category,
-          stock: stock
-        }]
-      }
+        // Enviar al dataLayer
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: "view_item",
+          ecommerce: {
+            items: [
+              {
+                item_id: id,
+                item_name: name,
+                price: price,
+                stock: stock,
+              },
+            ],
+          },
+        });
+
+        // Opcional: console.log para verificar
+        console.log("Evento view_item enviado:", { id, name, price, stock });
+      });
     });
   }
 
@@ -152,30 +160,32 @@ class App {
   trackAddToCart() {
     document.querySelectorAll('.product__button').forEach((button, index) => {
       button.addEventListener('click', function () {
-        const productContainer = button.closest('.product__content');
-        const name = productContainer.querySelector('.product__title a').textContent.trim();
-        const price = parseFloat(productContainer.querySelector('.product__price').textContent.replace(/[^0-9.]/g, ''));
+        const card = button.closest('.product__card');
+
         const id = button.dataset.id;
-        const category = productContainer.dataset.category || 'smartphones';
+        const name = card.querySelector('.product__title a').textContent.trim();
+        const priceText = card.querySelector('.product__price').textContent.trim();
+        const price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
         const stock = true;
 
+        // Enviar al dataLayer
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
           event: 'add_to_cart',
           ecommerce: {
             currency: 'USD',
-            reference: 'pagina principal',
             items: [{
               item_id: id,
               item_name: name,
               price: price,
-              item_category: category,
               stock: stock,
               quantity: 1,
               index: index + 1
             }]
           }
         });
+
+        console.log("Evento add_to_cart enviado:", { id, name, price, stock, quantity, index });
       });
     });
   }

@@ -1,5 +1,7 @@
 import { cartUI } from "./ui/cartUI.js";
 import { productsUI } from "./ui/productsUI.js";
+import { products } from "./data/products.js";
+
 
 class App {
   constructor() {
@@ -14,6 +16,9 @@ class App {
     this.trackViewItemList();
     this.trackViewItem();
     this.trackAddToCart();
+    this.trackViewCart();
+    this.trackBeginCheckout();
+
   }
 
   setupMobileMenu() {
@@ -92,7 +97,8 @@ class App {
       const name = el.querySelector('.product__title a').textContent.trim();
       const price = parseFloat(el.querySelector('.product__price').textContent.replace(/[^0-9.]/g, ''));
       const id = el.querySelector('.product__button').dataset.id;
-      const category = el.dataset.category || 'smartphones';
+      const match = products.find(p => p.id.toString() === id);
+      const category = match?.category || 'unknown';      
       const stock = true; // Modificar si es dinámico
 
       items.push({
@@ -123,6 +129,8 @@ class App {
         // Obtener ID desde el href del botón
         const url = new URL(btn.href, window.location.origin);
         const id = url.searchParams.get("id");
+        const match = products.find(p => p.id.toString() === id);
+        const category = match?.category || 'unknown';
 
         // Extraer nombre del producto
         const name = card.querySelector(".product__title a").textContent.trim();
@@ -144,7 +152,8 @@ class App {
                 item_id: id,
                 item_name: name,
                 price: price,
-                stock: stock,
+                category: category,
+                stock: stock
               },
             ],
           },
@@ -163,6 +172,8 @@ class App {
         const card = button.closest('.product__card');
 
         const id = button.dataset.id;
+        const match = products.find(p => p.id.toString() === id);
+        const category = match?.category || 'unknown';
         const name = card.querySelector('.product__title a').textContent.trim();
         const priceText = card.querySelector('.product__price').textContent.trim();
         const price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
@@ -179,6 +190,7 @@ class App {
               item_id: id,
               item_name: name,
               price: price,
+              category: category,
               stock: stock,
               quantity: quantity,
               index: index + 1
@@ -190,6 +202,97 @@ class App {
       });
     });
   }
+
+  trackViewCart() {
+    const btn = document.querySelector('.cart-modal__footer .button--secondary');
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      const cartItems = document.querySelectorAll('.cart-item');
+      const items = [];
+
+      cartItems.forEach((item, index) => {
+        const id = item.dataset.id;
+        const name = item.querySelector('.cart-item__name')?.textContent.trim();
+        const priceText = item.querySelector('.cart-item__price')?.textContent.trim();
+        const price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
+        const quantity = parseInt(item.querySelector('.cart-item__quantity span')?.textContent) || 1;
+
+        const match = products.find(p => p.id.toString() === id);
+        const category = match?.category || 'unknown';
+        const stock = true; // puedes hacerlo dinámico si lo necesitas
+
+        items.push({
+          item_id: id,
+          item_name: name,
+          price: price,
+          item_category: category,
+          stock: stock,
+          quantity: quantity,
+          index: index + 1
+        });
+      });
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "view_cart",
+        ecommerce: {
+          items: items
+        }
+      });
+
+      console.log("view_cart enviado:", items);
+    });
+}
+
+trackBeginCheckout() {
+  const btn = document.querySelector('.cart-modal__footer .button--primary');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const cartItems = document.querySelectorAll('.cart-item');
+    const items = [];
+
+    let value = 0;
+
+    cartItems.forEach((item, index) => {
+      const id = item.dataset.id;
+      const name = item.querySelector('.cart-item__name')?.textContent.trim();
+      const priceText = item.querySelector('.cart-item__price')?.textContent.trim();
+      const price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
+      const quantity = parseInt(item.querySelector('.cart-item__quantity span')?.textContent) || 1;
+
+      const match = products.find(p => p.id.toString() === id);
+      const category = match?.category || 'unknown';
+      const stock = true;
+
+      value += price * quantity;
+
+      items.push({
+        item_id: id,
+        item_name: name,
+        price: price,
+        item_category: category,
+        stock: stock,
+        quantity: quantity,
+        index: index + 1
+      });
+    });
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "begin_checkout",
+      ecommerce: {
+        currency: "USD",
+        value: parseFloat(value.toFixed(2)),
+        items: items
+      }
+    });
+
+    console.log("begin_checkout enviado:", { value, items });
+  });
+}
+
 }
 
 document.addEventListener("DOMContentLoaded", () => {

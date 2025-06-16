@@ -79,8 +79,6 @@ class CheckoutPage {
         shipping_price: shippingPrice,
         items,
       });
-
-      form.submit(); // continuar a pago real si hace falta
     });
   }
 }

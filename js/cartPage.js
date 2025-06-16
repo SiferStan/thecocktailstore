@@ -3,9 +3,6 @@ import { cartUI } from "./ui/cartUI.js";
 import { products } from "./data/products.js";
 
 class CartPage {
-  constructor() {
-    this.initializeApp();
-  }
 
   initializeApp() {
     // Esto mantiene el comportamiento original
@@ -22,13 +19,16 @@ class CartPage {
     const cartItems = document.querySelectorAll(".cart-item");
     const items = [];
 
-    cartItems.forEach((item) => {
+    cartItems.forEach((item, index) => {
       const id = item.dataset.id;
-      const name = item.querySelector(".item-name")?.textContent.trim();
-      const priceText = item.querySelector(".item-price")?.textContent.trim();
-      const price = parseFloat(priceText.replace(/[^0-9.]/g, ""));
-      const quantity = parseInt(item.querySelector(".item-quantity span")?.textContent) || 1;
+      const name = item.querySelector(".item-name")?.textContent?.trim();
+      const priceText = item.querySelector(".item-price")?.textContent?.trim();
+      const quantityText = item.querySelector(".item-quantity span")?.textContent;
 
+      if (!id || !name || !priceText || !quantityText) return;
+
+      const price = parseFloat(priceText.replace(/[^0-9.]/g, ""));
+      const quantity = parseInt(quantityText);
       const match = products.find((p) => p.id.toString() === id);
       const category = match?.category || "unknown";
       const stock = true;
@@ -69,8 +69,11 @@ class CartPage {
       const items = this.getCartItemsFromDOM();
       if (!items.length) return;
 
-      const totalText = document.querySelector(".cart-total")?.textContent.trim();
+      const totalText = document.querySelector(".cart-total")?.textContent?.trim();
+      if (!totalText) return;
+
       const value = parseFloat(totalText.replace(/[^0-9.]/g, ""));
+      if (isNaN(value)) return;
 
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
@@ -85,6 +88,7 @@ class CartPage {
       console.log("[begin_checkout]", { value, items });
     });
   }
+
 
   setupAddCoupon() {
     const btn = document.querySelector(".apply-coupon");
@@ -116,5 +120,6 @@ class CartPage {
 
 // Inicializar
 document.addEventListener("DOMContentLoaded", () => {
-  new CartPage();
+  const cart = new CartPage();
+  cart.initializeApp();
 });

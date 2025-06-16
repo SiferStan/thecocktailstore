@@ -4,6 +4,15 @@ import { products } from "./data/products.js";
 
 class CartPage {
   constructor() {
+    this.initializeApp();
+  }
+
+  initializeApp() {
+    // Esto mantiene el comportamiento original
+    this.cartPageUI = new CartPageUI();
+    window.cartUIInstance = cartUI;
+
+    // Eventos de tracking
     this.trackViewCart();
     this.setupBeginCheckout();
     this.setupAddCoupon();
@@ -38,7 +47,6 @@ class CartPage {
   }
 
   trackViewCart() {
-    document.addEventListener("DOMContentLoaded", () => {
       const items = this.getCartItemsFromDOM();
       if (!items.length) return;
 
@@ -51,7 +59,6 @@ class CartPage {
       });
 
       console.log("[view_cart]", items);
-    });
   }
 
   setupBeginCheckout() {
@@ -109,7 +116,5 @@ class CartPage {
 
 // Inicializar
 document.addEventListener("DOMContentLoaded", () => {
-  const cartPageUI = new CartPageUI();
-  window.cartUIInstance = cartUI;
   new CartPage();
 });

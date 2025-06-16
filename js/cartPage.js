@@ -109,7 +109,7 @@ class CartPage {
 
 // Inicializar
 document.addEventListener("DOMContentLoaded", () => {
-  new CartPage();
   const cartPageUI = new CartPageUI();
   window.cartUIInstance = cartUI;
+  new CartPage();
 });

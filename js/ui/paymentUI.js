@@ -108,7 +108,7 @@ export class PaymentUI {
         .placeOrder()
         .then((orderDetails) => {
           console.log("Order details before redirect:", orderDetails);
-          window.location.href = `/confirmation.html?order=${orderDetails.orderNumber}`;
+          window.location.href = `confirmation.html?order=${orderDetails.orderNumber}`;
         })
         .catch((error) => {
           alert("Error al procesar el pago: " + error.message);
